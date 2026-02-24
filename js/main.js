@@ -41,19 +41,36 @@ async function createPokemonCard(pokemon) {
   const card = document.createElement("div");
   card.classList.add("pokemon-card");
 
-  // 🎨 Aplicamos color según tipo
+  // Obtenemos tipo de Pokemon
   const mainType = data.types[0].type.name;
-  card.style.backgroundColor = typeColors[mainType] || "#777";
 
   const id = data.id.toString().padStart(3, "0");
   const image = data.sprites.other["official-artwork"].front_default;
   const name = data.name;
 
-  card.innerHTML = `
-    <p>#${id}</p>
-    <img src="${image}" alt="${name}" />
-    <h3>${name}</h3>
-  `;
+card.innerHTML = `
+  <div class="card-inner">
+    <div class="card-front">
+      <p>#${id}</p>
+      <img src="${image}" alt="${name}" />
+      <h3>${name}</h3>
+    </div>
+
+    <div class="card-back">
+      <h4>Type</h4>
+      <p>${data.types.map(t => t.type.name).join(", ")}</p>
+
+      <h4>Stats</h4>
+      ${data.stats.map(stat => `
+        <p>${stat.stat.name}: ${stat.base_stat}</p>
+      `).join("")}
+    </div>
+  </div>
+`;
+
+  // 🎨 Aplicamos color según tipo
+const front = card.querySelector(".card-front");
+front.style.backgroundColor = typeColors[mainType] || "#777";
 
   pokedex.appendChild(card);
 }
