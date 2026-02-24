@@ -28,25 +28,30 @@ async function getPokemonList() {
   renderPokemonList(data.results);
 }
 
-function renderPokemonList(pokemonArray) {
-  pokemonArray.forEach(pokemon => {
-    createPokemonCard(pokemon);
-  });
+async function renderPokemonList(pokemonArray) {
+  const promises = pokemonArray.map(pokemon => createPokemonCardData(pokemon));
+  
+  const allPokemonData = await Promise.all(promises);
+
+  allPokemonData
+    .sort((a, b) => a.id - b.id)
+    .forEach(data => createPokemonCard(data));
 }
 
-async function createPokemonCard(pokemon) {
+async function createPokemonCardData(pokemon) {
   const response = await fetch(pokemon.url);
-  const data = await response.json();
+  return await response.json();
+}
 
+function createPokemonCard(data) {
   const card = document.createElement("div");
   card.classList.add("pokemon-card");
-
-  // Obtenemos tipo de Pokemon
-  const mainType = data.types[0].type.name;
 
   const id = data.id.toString().padStart(3, "0");
   const image = data.sprites.other["official-artwork"].front_default;
   const name = data.name;
+  // Obtenemos tipo de Pokemon
+  const mainType = data.types[0].type.name;
 
 card.innerHTML = `
   <div class="card-inner">
@@ -68,9 +73,14 @@ card.innerHTML = `
   </div>
 `;
 
+  const front = card.querySelector(".card-front");
+  const back = card.querySelector(".card-back");
+
   // 🎨 Aplicamos color según tipo
-const front = card.querySelector(".card-front");
-front.style.backgroundColor = typeColors[mainType] || "#777";
+  const color = typeColors[mainType] || "#777";
+
+  front.style.backgroundColor = color;
+  back.style.background = `linear-gradient(135deg, ${color}, #222)`;
 
   pokedex.appendChild(card);
 }
